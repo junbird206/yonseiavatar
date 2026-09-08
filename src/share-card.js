@@ -1,8 +1,5 @@
-import { TEST_PUBLIC_URL } from "./data.js";
-
 const CARD_WIDTH = 1080;
-const CARD_HEIGHT = 1920;
-const GEMINI_LOCKUP = "./assets/gemini/google-gemini-lockup.png";
+const CARD_HEIGHT = 1728;
 
 const themes = {
   baekyang: ["#F5F9FF", "#00256C", "#1F2933"],
@@ -13,7 +10,7 @@ const themes = {
   romance: ["#FFF4F0", "#B45309", "#43302A"]
 };
 
-export async function generateResultCard(type, matchNames) {
+export async function generateResultCard(type) {
   const canvas = document.querySelector("#share-renderer") ?? document.createElement("canvas");
   canvas.width = CARD_WIDTH;
   canvas.height = CARD_HEIGHT;
@@ -22,27 +19,9 @@ export async function generateResultCard(type, matchNames) {
 
   await drawBackground(ctx, type, background, accent, ink);
 
-  drawCenteredText(ctx, "나의 연세대 2학기 생존 독수리는", 540, 1008, 40, ink, "800");
-  drawTypeTitle(ctx, type.name, 540, 1096, 820, accent);
-  drawWrappedText(ctx, type.oneLiner, 540, 1328, 780, 38, 1.42, ink, "800", "center");
-
-  drawInfoPill(ctx, `찰떡궁합 ${matchNames.good}`, 140, 1460, 800, accent, "#FFFFFF");
-  drawInfoPill(ctx, `거리두기 ${matchNames.bad}`, 140, 1552, 800, ink, "#FFFFFF");
-
-  const logo = await loadImage(GEMINI_LOCKUP);
-  drawContainedImage(ctx, logo, 330, 1640, 420, 74);
-
-  ctx.fillStyle = ink;
-  ctx.font = "700 30px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText("대학생·대학원생이라면", 540, 1746);
-  ctx.fillStyle = accent;
-  ctx.font = "900 42px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.fillText("Google AI Plus 12개월 무료", 540, 1800);
-
-  ctx.fillStyle = ink;
-  ctx.font = "800 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.fillText(TEST_PUBLIC_URL, 540, 1862);
+  const titleBottom = drawTypeTitle(ctx, type.name, 540, 900, 880, accent);
+  const oneLinerBottom = drawWrappedText(ctx, type.oneLiner, 540, titleBottom + 70, 860, 38, 1.38, "#007C89", "900", "center");
+  drawWrappedText(ctx, type.description, 72, oneLinerBottom + 72, 936, 34, 1.66, ink, "700", "left");
 
   return canvasToBlob(canvas);
 }
@@ -71,40 +50,8 @@ async function drawBackground(ctx, type, background, accent, ink) {
   ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
 
   const image = await loadImage(type.backgroundAsset ?? type.imageAsset);
-  drawCoverImage(ctx, image, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-  drawVerticalFade(ctx, 800, 1240, paper);
-
-  ctx.globalAlpha = 0.08;
-  ctx.fillStyle = ink;
-  for (let y = 1430; y < CARD_HEIGHT; y += 190) {
-    ctx.fillRect(85, y, 910, 4);
-  }
-  ctx.globalAlpha = 1;
-
-  ctx.beginPath();
-  ctx.roundRect(86, 112, 908, 1778, 44);
-  ctx.strokeStyle = accent;
-  ctx.lineWidth = 8;
-  ctx.stroke();
-}
-
-function drawCoverImage(ctx, image, x, y, width, height) {
-  const sourceRatio = image.naturalWidth / image.naturalHeight;
-  const targetRatio = width / height;
-  let sourceX = 0;
-  let sourceY = 0;
-  let sourceWidth = image.naturalWidth;
-  let sourceHeight = image.naturalHeight;
-
-  if (sourceRatio > targetRatio) {
-    sourceWidth = image.naturalHeight * targetRatio;
-    sourceX = (image.naturalWidth - sourceWidth) / 2;
-  } else {
-    sourceHeight = image.naturalWidth / targetRatio;
-    sourceY = (image.naturalHeight - sourceHeight) / 2;
-  }
-
-  ctx.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, x, y, width, height);
+  drawWidthImage(ctx, image, 0, -150, CARD_WIDTH);
+  drawVerticalFade(ctx, 720, 1010, paper);
 }
 
 function drawVerticalFade(ctx, fromY, toY, color) {
@@ -118,22 +65,9 @@ function drawVerticalFade(ctx, fromY, toY, color) {
   ctx.fillRect(0, toY, CARD_WIDTH, CARD_HEIGHT - toY);
 }
 
-function drawInfoPill(ctx, text, x, y, width, fill, textColor) {
-  ctx.beginPath();
-  ctx.roundRect(x, y, width, 76, 38);
-  ctx.fillStyle = fill;
-  ctx.fill();
-  ctx.fillStyle = textColor;
-  ctx.font = "800 29px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText(text, x + width / 2, y + 49);
-}
-
-function drawContainedImage(ctx, image, x, y, width, height) {
-  const ratio = Math.min(width / image.naturalWidth, height / image.naturalHeight);
-  const drawWidth = image.naturalWidth * ratio;
-  const drawHeight = image.naturalHeight * ratio;
-  ctx.drawImage(image, x + (width - drawWidth) / 2, y + (height - drawHeight) / 2, drawWidth, drawHeight);
+function drawWidthImage(ctx, image, x, y, width) {
+  const height = width * (image.naturalHeight / image.naturalWidth);
+  ctx.drawImage(image, x, y, width, height);
 }
 
 function drawCenteredText(ctx, text, x, y, size, color, weight = "700") {
@@ -141,12 +75,13 @@ function drawCenteredText(ctx, text, x, y, size, color, weight = "700") {
   ctx.font = `${weight} ${size}px system-ui, -apple-system, BlinkMacSystemFont, sans-serif`;
   ctx.textAlign = "center";
   ctx.fillText(text, x, y);
+  return y + size;
 }
 
 function drawTypeTitle(ctx, name, x, y, maxWidth, color) {
   const { prefix, eagle } = splitEagleTitle(name);
-  drawCenteredText(ctx, prefix, x, y, 54, color, "900");
-  drawWrappedText(ctx, eagle, x, y + 84, maxWidth, 96, 1.02, color, "900", "center");
+  const prefixBottom = drawCenteredText(ctx, prefix, x, y, 50, color, "900");
+  return drawWrappedText(ctx, eagle, x, prefixBottom + 28, maxWidth, 86, 1.02, color, "900", "center");
 }
 
 function drawWrappedText(ctx, text, x, y, maxWidth, size, lineHeight, color, weight, align = "left") {
@@ -169,9 +104,12 @@ function drawWrappedText(ctx, text, x, y, maxWidth, size, lineHeight, color, wei
   });
   lines.push(line);
 
+  const lineGap = size * lineHeight;
   lines.forEach((wrappedLine, index) => {
-    ctx.fillText(wrappedLine, x, y + index * size * lineHeight);
+    ctx.fillText(wrappedLine, x, y + index * lineGap);
   });
+
+  return y + (lines.length - 1) * lineGap + size;
 }
 
 function splitEagleTitle(name) {
