@@ -1,6 +1,6 @@
 import { PROMOTION_LINKS, QUESTIONS, TYPES } from "./data.js";
 import { calculateResult, getTypeById } from "./scoring.js";
-import { saveOrShareResultCard } from "./share-card.js?v=20260908-share-card-gradient-4";
+import { saveOrShareResultCard } from "./share-card.js?v=20260909-share-card-gradient";
 
 const app = document.querySelector("#app");
 
