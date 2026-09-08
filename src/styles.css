@@ -104,6 +104,7 @@ button {
 }
 
 .hero-screen {
+  --hero-bg-y: calc(-1 * min(11svh, 88px));
   position: relative;
   display: flex;
   flex-direction: column;
@@ -112,27 +113,39 @@ button {
   overflow: hidden;
   isolation: isolate;
   background:
-    linear-gradient(180deg, rgba(11, 33, 82, 0.08), rgba(246, 250, 255, 0.96) 73%, #f6faff 100%),
+    linear-gradient(180deg, rgba(8, 26, 69, 0.02) 0%, rgba(246, 250, 255, 0.08) 54%, rgba(246, 250, 255, 0.78) 79%, #f6faff 100%),
+    url("../assets/eagles/hero-bg.png") center var(--hero-bg-y) / cover no-repeat,
     linear-gradient(155deg, #d6eaff 0%, #f9fbff 48%, #c9d9ff 100%);
 }
 
 .hero-screen::before {
   position: absolute;
   inset: 0;
-  z-index: -2;
+  z-index: 0;
   background:
     linear-gradient(180deg, rgba(8, 26, 69, 0.02) 0%, rgba(246, 250, 255, 0.08) 54%, rgba(246, 250, 255, 0.78) 79%, #f6faff 100%),
-    url("../assets/eagles/hero-bg.png") center top / cover no-repeat;
+    url("../assets/eagles/hero-bg.png") center var(--hero-bg-y) / cover no-repeat;
   content: "";
 }
 
 .hero-screen::after {
   position: absolute;
   inset: auto -20% 0;
-  z-index: -1;
+  z-index: 1;
   height: 42%;
   background: linear-gradient(180deg, rgba(246, 250, 255, 0), rgba(246, 250, 255, 0.94) 42%, #f6faff 100%);
   content: "";
+}
+
+.hero-screen > * {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-art,
+.hero-image,
+.hero-screen > img {
+  display: none !important;
 }
 
 .eyebrow {
