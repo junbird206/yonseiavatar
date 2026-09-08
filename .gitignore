@@ -1,0 +1,16 @@
+dist/
+node_modules/
+.DS_Store
+.env
+.env.*
+
+
+# Local Netlify folder
+.netlify
+
+# Local image generation intermediates
+assets/tigers/generated/
+assets/tigers/
+
+# Source brand asset drop folder; optimized app assets live in assets/gemini/
+GeminiAsset/
