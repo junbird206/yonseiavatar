@@ -1,5 +1,10 @@
 const CARD_WIDTH = 1080;
 const CARD_HEIGHT = 1728;
+const PAPER = "#F6FAFF";
+const TITLE = "#001A4D";
+const TEAL = "#007C89";
+const BODY = "#3F3A39";
+const FONT_STACK = "'IBM Plex Sans KR', system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
 
 const themes = {
   baekyang: ["#F5F9FF", "#00256C", "#1F2933"],
@@ -11,17 +16,19 @@ const themes = {
 };
 
 export async function generateResultCard(type) {
+  await document.fonts?.ready;
+
   const canvas = document.querySelector("#share-renderer") ?? document.createElement("canvas");
   canvas.width = CARD_WIDTH;
   canvas.height = CARD_HEIGHT;
   const ctx = canvas.getContext("2d");
-  const [background, accent, ink] = themes[type.id] ?? themes.baekyang;
+  const [background] = themes[type.id] ?? themes.baekyang;
 
-  await drawBackground(ctx, type, background, accent, ink);
+  await drawBackground(ctx, type, background);
 
-  const titleBottom = drawTypeTitle(ctx, type.name, 540, 1010, 880, accent);
-  const oneLinerBottom = drawBalancedCenteredText(ctx, type.oneLiner, 540, titleBottom + 56, 760, 38, 1.56, "#007C89", "900");
-  drawWrappedText(ctx, type.description, 72, oneLinerBottom + 66, 936, 34, 1.66, ink, "700", "left");
+  const titleBottom = drawTypeTitle(ctx, type.name, 540, 1036, 880, TITLE);
+  const oneLinerBottom = drawBalancedCenteredText(ctx, type.oneLiner, 540, titleBottom + 46, 640, 38, 1.54, TEAL, "900");
+  drawWrappedText(ctx, type.description, 72, oneLinerBottom + 68, 936, 34, 1.66, BODY, "700", "left");
 
   return canvasToBlob(canvas);
 }
@@ -44,14 +51,13 @@ function downloadBlob(blob, filename) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-async function drawBackground(ctx, type, background, accent, ink) {
-  const paper = "#F6FAFF";
-  ctx.fillStyle = paper;
+async function drawBackground(ctx, type, background) {
+  ctx.fillStyle = PAPER;
   ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
 
   const image = await loadImage(type.backgroundAsset ?? type.imageAsset);
-  drawWidthImage(ctx, image, 0, -110, CARD_WIDTH);
-  drawVerticalFade(ctx, 960, 1220, paper);
+  drawWidthImage(ctx, image, 0, -170, CARD_WIDTH);
+  drawVerticalFade(ctx, 945, 1140, PAPER);
 }
 
 function drawVerticalFade(ctx, fromY, toY, color) {
@@ -72,7 +78,7 @@ function drawWidthImage(ctx, image, x, y, width) {
 
 function drawCenteredText(ctx, text, x, y, size, color, weight = "700") {
   ctx.fillStyle = color;
-  ctx.font = `${weight} ${size}px system-ui, -apple-system, BlinkMacSystemFont, sans-serif`;
+  ctx.font = `${weight} ${size}px ${FONT_STACK}`;
   ctx.textAlign = "center";
   ctx.fillText(text, x, y);
   return y + size;
@@ -81,12 +87,12 @@ function drawCenteredText(ctx, text, x, y, size, color, weight = "700") {
 function drawTypeTitle(ctx, name, x, y, maxWidth, color) {
   const { prefix, eagle } = splitEagleTitle(name);
   const prefixBottom = drawCenteredText(ctx, prefix, x, y, 50, color, "900");
-  return drawWrappedText(ctx, eagle, x, prefixBottom + 84, maxWidth, 86, 1.06, color, "900", "center");
+  return drawWrappedText(ctx, eagle, x, prefixBottom + 42, maxWidth, 86, 1.06, color, "900", "center");
 }
 
 function drawBalancedCenteredText(ctx, text, x, y, maxWidth, size, lineHeight, color, weight) {
   ctx.fillStyle = color;
-  ctx.font = `${weight} ${size}px system-ui, -apple-system, BlinkMacSystemFont, sans-serif`;
+  ctx.font = `${weight} ${size}px ${FONT_STACK}`;
   ctx.textAlign = "center";
 
   const words = text.split(" ");
@@ -128,7 +134,7 @@ function drawBalancedCenteredText(ctx, text, x, y, maxWidth, size, lineHeight, c
 
 function drawWrappedText(ctx, text, x, y, maxWidth, size, lineHeight, color, weight, align = "left") {
   ctx.fillStyle = color;
-  ctx.font = `${weight} ${size}px system-ui, -apple-system, BlinkMacSystemFont, sans-serif`;
+  ctx.font = `${weight} ${size}px ${FONT_STACK}`;
   ctx.textAlign = align;
 
   const words = text.split(" ");
