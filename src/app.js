@@ -1,6 +1,6 @@
-import { PROMOTION_LINKS, QUESTIONS, TYPES } from "./data.js";
+import { PROMOTION_LINKS, QUESTIONS, TEST_PUBLIC_URL, TYPES } from "./data.js";
 import { calculateResult, getTypeById } from "./scoring.js";
-import { saveOrShareResultCard } from "./share-card.js?v=20260910-action-panel";
+import { saveOrShareResultCard } from "./share-card.js?v=20260910-native-share";
 
 const app = document.querySelector("#app");
 
@@ -172,8 +172,9 @@ function renderResult() {
   });
 
   app.querySelector("[data-action='copy-link']").addEventListener("click", async () => {
-    await copyText(window.location.href);
-    state.saveMessage = "테스트 링크를 복사했어요.";
+    const shareStatus = await shareResult(type);
+    if (shareStatus === "cancelled") return;
+    state.saveMessage = shareStatus === "shared" ? "공유창을 열었어요." : "테스트 링크를 복사했어요.";
     renderResult();
   });
 
@@ -237,6 +238,34 @@ async function copyText(text) {
   textarea.select();
   document.execCommand("copy");
   textarea.remove();
+}
+
+async function shareResult(type) {
+  const shareData = {
+    title: "나의 연세대 2학기 생존 독수리 유형은?",
+    text: `나는 ${type.name}! ${type.oneLiner}`,
+    url: getShareUrl()
+  };
+
+  if (navigator.share) {
+    try {
+      await navigator.share(shareData);
+      return "shared";
+    } catch (error) {
+      if (error?.name === "AbortError") return "cancelled";
+    }
+  }
+
+  await copyText(shareData.url);
+  return "copied";
+}
+
+function getShareUrl() {
+  if (window.location.protocol === "http:" || window.location.protocol === "https:") {
+    return window.location.href;
+  }
+
+  return `https://${TEST_PUBLIC_URL}`;
 }
 
 function getRandomPromotionLink() {
