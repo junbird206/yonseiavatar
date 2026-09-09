@@ -1,6 +1,6 @@
 import { PROMOTION_LINKS, QUESTIONS, TYPES } from "./data.js";
 import { calculateResult, getTypeById } from "./scoring.js";
-import { saveOrShareResultCard } from "./share-card.js?v=20260910-result-page-font-card";
+import { saveOrShareResultCard } from "./share-card.js?v=20260910-action-panel";
 
 const app = document.querySelector("#app");
 
@@ -133,13 +133,21 @@ function renderResult() {
       </section>
 
       <button class="save-button" data-action="save-image">결과 이미지 저장</button>
-      ${state.saveMessage ? `<p class="save-message">${state.saveMessage}</p>` : ""}
       <button class="secondary-button" data-action="copy-link">친구에게 공유</button>
+
+      <section class="gemini-setting" aria-labelledby="gemini-setting-title">
+        <div class="gemini-setting-copy">
+          <h3 id="gemini-setting-title">이 독수리를 위한 Gemini 세팅법</h3>
+          <p>${type.settingPrompt}</p>
+        </div>
+        <button class="prompt-copy-button" data-action="copy-setting">세팅법 복사</button>
+      </section>
+      ${state.saveMessage ? `<p class="save-message">${state.saveMessage}</p>` : ""}
 
       <a class="signup-cta" href="${PROMOTION_LINKS[0]}" target="_blank" rel="noreferrer" data-action="promotion-link">
         <img class="gemini-lockup gemini-lockup-light" src="./assets/gemini/google-gemini-lockup-white.png" alt="Google Gemini" />
         <span>이 테스트, Gemini로 만들었습니다.</span>
-        <strong>대학생·대학원생은 Google AI Plus 12개월 무료 →</strong>
+        <strong>대학생·대학원생은 Google AI Plus 1년 무료 → (클릭)</strong>
       </a>
 
       <button class="ghost-button restart-button" data-action="restart">테스트 다시 하기</button>
@@ -155,7 +163,7 @@ function renderResult() {
         good: goodMatch.name,
         bad: badMatch.name
       });
-      state.saveMessage = "스토리에 올릴 때 링크 스티커도 같이 달아주세요!";
+      state.saveMessage = "";
     } catch {
       state.saveMessage = "이미지 저장을 다시 시도해주세요.";
     } finally {
@@ -166,6 +174,12 @@ function renderResult() {
   app.querySelector("[data-action='copy-link']").addEventListener("click", async () => {
     await copyText(window.location.href);
     state.saveMessage = "테스트 링크를 복사했어요.";
+    renderResult();
+  });
+
+  app.querySelector("[data-action='copy-setting']").addEventListener("click", async () => {
+    await copyText(type.settingPrompt);
+    state.saveMessage = "Gemini 세팅법을 복사했어요.";
     renderResult();
   });
 
