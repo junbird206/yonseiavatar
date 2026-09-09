@@ -19,9 +19,9 @@ export async function generateResultCard(type) {
 
   await drawBackground(ctx, type, background, accent, ink);
 
-  const titleBottom = drawTypeTitle(ctx, type.name, 540, 900, 880, accent);
-  const oneLinerBottom = drawWrappedText(ctx, type.oneLiner, 540, titleBottom + 70, 860, 38, 1.38, "#007C89", "900", "center");
-  drawWrappedText(ctx, type.description, 72, oneLinerBottom + 72, 936, 34, 1.66, ink, "700", "left");
+  const titleBottom = drawTypeTitle(ctx, type.name, 540, 884, 880, accent);
+  const oneLinerBottom = drawBalancedCenteredText(ctx, type.oneLiner, 540, titleBottom + 84, 810, 38, 1.56, "#007C89", "900");
+  drawWrappedText(ctx, type.description, 72, oneLinerBottom + 76, 936, 34, 1.66, ink, "700", "left");
 
   return canvasToBlob(canvas);
 }
@@ -81,7 +81,49 @@ function drawCenteredText(ctx, text, x, y, size, color, weight = "700") {
 function drawTypeTitle(ctx, name, x, y, maxWidth, color) {
   const { prefix, eagle } = splitEagleTitle(name);
   const prefixBottom = drawCenteredText(ctx, prefix, x, y, 50, color, "900");
-  return drawWrappedText(ctx, eagle, x, prefixBottom + 28, maxWidth, 86, 1.02, color, "900", "center");
+  return drawWrappedText(ctx, eagle, x, prefixBottom + 42, maxWidth, 86, 1.06, color, "900", "center");
+}
+
+function drawBalancedCenteredText(ctx, text, x, y, maxWidth, size, lineHeight, color, weight) {
+  ctx.fillStyle = color;
+  ctx.font = `${weight} ${size}px system-ui, -apple-system, BlinkMacSystemFont, sans-serif`;
+  ctx.textAlign = "center";
+
+  const words = text.split(" ");
+  const fullWidth = ctx.measureText(text).width;
+  if (fullWidth <= maxWidth) {
+    ctx.fillText(text, x, y);
+    return y + size;
+  }
+
+  let bestLines = null;
+  let bestScore = Number.POSITIVE_INFINITY;
+
+  for (let index = 1; index < words.length; index += 1) {
+    const firstLine = words.slice(0, index).join(" ");
+    const secondLine = words.slice(index).join(" ");
+    const firstWidth = ctx.measureText(firstLine).width;
+    const secondWidth = ctx.measureText(secondLine).width;
+    if (firstWidth > maxWidth || secondWidth > maxWidth) continue;
+
+    const orphanPenalty = Math.min(firstLine.length, secondLine.length) < 8 ? 1000 : 0;
+    const score = Math.abs(firstWidth - secondWidth) + orphanPenalty;
+    if (score < bestScore) {
+      bestScore = score;
+      bestLines = [firstLine, secondLine];
+    }
+  }
+
+  if (!bestLines) {
+    return drawWrappedText(ctx, text, x, y, maxWidth, size, lineHeight, color, weight, "center");
+  }
+
+  const lineGap = size * lineHeight;
+  bestLines.forEach((line, index) => {
+    ctx.fillText(line, x, y + index * lineGap);
+  });
+
+  return y + (bestLines.length - 1) * lineGap + size;
 }
 
 function drawWrappedText(ctx, text, x, y, maxWidth, size, lineHeight, color, weight, align = "left") {
