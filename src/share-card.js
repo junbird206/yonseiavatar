@@ -19,9 +19,9 @@ export async function generateResultCard(type) {
 
   await drawBackground(ctx, type, background, accent, ink);
 
-  const titleBottom = drawTypeTitle(ctx, type.name, 540, 884, 880, accent);
-  const oneLinerBottom = drawBalancedCenteredText(ctx, type.oneLiner, 540, titleBottom + 84, 810, 38, 1.56, "#007C89", "900");
-  drawWrappedText(ctx, type.description, 72, oneLinerBottom + 76, 936, 34, 1.66, ink, "700", "left");
+  const titleBottom = drawTypeTitle(ctx, type.name, 540, 1010, 880, accent);
+  const oneLinerBottom = drawBalancedCenteredText(ctx, type.oneLiner, 540, titleBottom + 56, 760, 38, 1.56, "#007C89", "900");
+  drawWrappedText(ctx, type.description, 72, oneLinerBottom + 66, 936, 34, 1.66, ink, "700", "left");
 
   return canvasToBlob(canvas);
 }
@@ -50,8 +50,8 @@ async function drawBackground(ctx, type, background, accent, ink) {
   ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
 
   const image = await loadImage(type.backgroundAsset ?? type.imageAsset);
-  drawWidthImage(ctx, image, 0, -150, CARD_WIDTH);
-  drawVerticalFade(ctx, 720, 1010, paper);
+  drawWidthImage(ctx, image, 0, -110, CARD_WIDTH);
+  drawVerticalFade(ctx, 960, 1220, paper);
 }
 
 function drawVerticalFade(ctx, fromY, toY, color) {
@@ -81,7 +81,7 @@ function drawCenteredText(ctx, text, x, y, size, color, weight = "700") {
 function drawTypeTitle(ctx, name, x, y, maxWidth, color) {
   const { prefix, eagle } = splitEagleTitle(name);
   const prefixBottom = drawCenteredText(ctx, prefix, x, y, 50, color, "900");
-  return drawWrappedText(ctx, eagle, x, prefixBottom + 42, maxWidth, 86, 1.06, color, "900", "center");
+  return drawWrappedText(ctx, eagle, x, prefixBottom + 84, maxWidth, 86, 1.06, color, "900", "center");
 }
 
 function drawBalancedCenteredText(ctx, text, x, y, maxWidth, size, lineHeight, color, weight) {
