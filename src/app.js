@@ -1,6 +1,6 @@
 import { PROMOTION_LINKS, QUESTIONS, TEST_PUBLIC_URL, TYPES } from "./data.js";
 import { calculateResult, getTypeById } from "./scoring.js";
-import { saveOrShareResultCard } from "./share-card.js?v=20260910-native-share";
+import { saveOrShareResultCard } from "./share-card.js?v=20260910-landing-eyebrow";
 
 const app = document.querySelector("#app");
 
